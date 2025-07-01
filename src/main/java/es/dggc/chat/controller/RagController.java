@@ -27,6 +27,7 @@ public class RagController {
 	@Autowired 
 	VectorStore vectorStore;
 	
+	//Controlado de subida de documentos
 	@PostMapping("/ai/data")
 	public ResponseEntity<String> loadData(  
 			@RequestPart("file") MultipartFile documento
