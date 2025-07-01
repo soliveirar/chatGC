@@ -59,9 +59,6 @@ public class RagController {
         return ResponseEntity.ok("Archivo subido: " + nombre + " (" + tamaño + " bytes)");
 	}
 	
-	
-	
-	
 	@GetMapping("/ai/rag") 
 	public ResponseEntity<String> testRAG(@RequestParam(value = "message") String message) {
 		log.info("Petición recibida");

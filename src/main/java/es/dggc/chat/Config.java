@@ -25,14 +25,5 @@ class Config {
                 		+ "Contesta siempre en español, de forma clara, educada y profesional.")
                 .build();
     }
-    
-//    @Bean
-//    public EmbeddingModel embeddingModel() {
-//        return new OllamaEmbeddingModel();
-//    }
-//    
-    
    
-
-    
 }
