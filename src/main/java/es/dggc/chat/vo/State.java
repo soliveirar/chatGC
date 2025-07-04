@@ -9,9 +9,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatRequest {
+public class State {
 
-	private String userId;
+	private String code;
 	private String message;
-	
 }

@@ -12,6 +12,11 @@ import lombok.Setter;
 public class MetadataDoc {
 	
 	private String name;
-	private String type;
+	private String origin;
+	private String author;
+	private String date;
+	private String category;
+	private String confidenciality;
+	
 
 }
