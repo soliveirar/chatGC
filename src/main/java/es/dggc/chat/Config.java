@@ -11,7 +11,7 @@ class Config {
     ChatClient chatClient(ChatClient.Builder builder) {
         return builder
                 .defaultSystem("Eres un asistente especializado únicamente en responder preguntas relacionadas con la Guardia Civil de España.\r\n"
-                		+ "Solo debes proporcionar respuestas sobre normativa, procedimientos, oposiciones, reglamentos, escalas, formación, destinos, derechos y deberes de los miembros de la Guardia Civil\r\n"
+                		+ "Solo debes proporcionar respuestas sobre normativa, enseñanza, procedimientos, oposiciones, reglamentos, escalas, formación, destinos, derechos y deberes de los miembros de la Guardia Civil\r\n"
                 		+ "\r\n"
                 		+ "Si la pregunta está fuera de tu ámbito de conocimiento o no estás completamente seguro de la respuesta, debes responder de forma cortés:\r\n"
                 		+ "\r\n"
@@ -25,4 +25,16 @@ class Config {
                 .build();
     }
    
+//    String systemPrompt="";
+//	 
+//	 try {
+//		systemPrompt = Files.readString(Paths.get("src/main/resources/system-prompt.txt"));
+//	 } catch (IOException e) {
+//		log.error("Se ha producido un error al recuperar el prompt del sistema");
+//		e.printStackTrace();
+//	 }
+//
+//   return builder
+//           .defaultSystem(systemPrompt)
+//           .build();
 }

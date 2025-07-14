@@ -1,9 +1,6 @@
 package es.dggc.chat.controller;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +11,10 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import es.dggc.chat.vo.MetadataDoc;
 
@@ -39,19 +40,24 @@ public class DocumentService {
              maxNumChunks:El número máximo de fragmentos a generar a partir de un texto (valor predeterminado: 10000).
              keepSeparator:Si se deben mantener los separadores (como nuevas líneas) en los fragmentos (valor predeterminado: verdadero).
 	    	 */
-	    	List<Document> documents = new TokenTextSplitter(1000, 400, 10, 5000, true)
+	    	List<Document> documents = new TokenTextSplitter(1024,  // chunkSize
+	    			200,  // chunkOverlap
+	    			200,  // maxChunks
+	    			5000, // maxTokenCount
+	    			true) // preserveWhitespace
 	    			.apply(tikaDocumentReader.read());
 	    	
-	    	//Set metadata
-	    	Map<String, String> metadata = new HashMap<String, String>();
-	    	metadata.put("source", metadataDoc.getName());
-	    	metadata.put("category", metadataDoc.getCategory());
-	    	metadata.put("date", LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")));
-	    	metadata.put("confidenciality", metadataDoc.getConfidenciality());
-	    	metadata.put("author", metadataDoc.getAuthor());
-	    	metadata.put("origin", metadataDoc.getOrigin());
+	
+	    	//Metadata
+	    	//Conversion del objeto de metadatos a key-value para su insercion en bbdd
+	    	ObjectMapper mapper = new ObjectMapper();
+	    	mapper.registerModule(new JavaTimeModule());
+	    	Map<String, String> metadata = mapper.convertValue(metadataDoc, new TypeReference<Map<String, String>>() {});
+	    	
+	    	//Asignacion de metadatos a los documentos
 	    	documents.stream().forEach(d -> d.getMetadata().putAll(metadata));
 	    	
-	        return documents;
+	    	return documents;
+	    
 	    }
 }

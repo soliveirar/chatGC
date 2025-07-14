@@ -1,6 +1,5 @@
 package es.dggc.chat.controller;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +12,7 @@ import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.document.Document;
+import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -57,14 +57,34 @@ public class ChatController {
         	 * Devuelve la respuesta generada por el modelo y el contexto
         	 * Es decir la documentación que se ha considerado relevante para generar la respuesta
         	 */
-        	ChatClientResponse chatClientResponse = chatClient.prompt()
-        			.advisors(
-        			        MessageChatMemoryAdvisor.builder(chatMemory).build(),   //Chatmemory
-        			        QuestionAnswerAdvisor.builder(vectorStore).build() 	  	//RAG
-        			    )
-        		    .user(request.getMessage())
-        		    .call()
-        		    .chatClientResponse();
+           SearchRequest searchRequest = SearchRequest.builder()
+                    .query(request.getMessage())
+                    .topK(3)
+                    .similarityThreshold(0.5)
+                    .build();
+          
+          QuestionAnswerAdvisor advisor = QuestionAnswerAdvisor.builder(vectorStore)
+        		    .searchRequest(searchRequest)
+        		    .build();
+
+       	ChatClientResponse chatClientResponse = this.chatClient.prompt()
+           .advisors(
+        		   MessageChatMemoryAdvisor.builder(chatMemory).build(),
+        		   advisor
+        		   )
+           .user(request.getMessage())
+           .call()
+           .chatClientResponse();
+           
+        	
+//        	ChatClientResponse chatClientResponse = chatClient.prompt()
+//        			.advisors(
+//        			        MessageChatMemoryAdvisor.builder(chatMemory).build(),   //Chatmemory
+//        			        QuestionAnswerAdvisor.builder(vectorStore).build() 	  	//RAG
+//        			    )
+//        		    .user(request.getMessage())
+//        		    .call()
+//        		    .chatClientResponse();
         	
             log.info("Se obtiene respuesta del modelo");
             AssistantMessage response = chatClientResponse.chatResponse().getResult().getOutput();

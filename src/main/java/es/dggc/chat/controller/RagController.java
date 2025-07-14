@@ -43,6 +43,9 @@ public class RagController {
             return ResponseEntity.badRequest().body("Archivo vacío");
         }
 		
+		//Set name documento 
+		metadata.setName(documento.getOriginalFilename());
+		
 		List<Document> docs=null;
 		try {
 			docs = documentService.extractTextFromDocument(documento, metadata);
