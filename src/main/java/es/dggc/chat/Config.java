@@ -1,40 +1,35 @@
 package es.dggc.chat;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import es.dggc.chat.util.Constants;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Configuration
 class Config {
 
     @Bean
     ChatClient chatClient(ChatClient.Builder builder) {
-        return builder
-                .defaultSystem("Eres un asistente especializado únicamente en responder preguntas relacionadas con la Guardia Civil de España.\r\n"
-                		+ "Solo debes proporcionar respuestas sobre normativa, enseñanza, procedimientos, oposiciones, reglamentos, escalas, formación, destinos, derechos y deberes de los miembros de la Guardia Civil\r\n"
-                		+ "\r\n"
-                		+ "Si la pregunta está fuera de tu ámbito de conocimiento o no estás completamente seguro de la respuesta, debes responder de forma cortés:\r\n"
-                		+ "\r\n"
-                		+ "\"Esta consulta requiere ser atendida por personal especializado. Por favor, dirígete a la Oficina de Atención al Guardia Civil (OAGC) para obtener información oficial y actualizada.\"\r\n"
-                		+ "\r\n"
-                		+ "No inventes respuestas, no improvises, y no des opiniones personales. Tu objetivo es ser preciso, riguroso y prudente.\r\n"
-                		+ "\r\n"
-                		+ "Cuando la normativa sea ambigua, informe siempre de la necesidad de consultar fuentes oficiales. Si el usuario solicita interpretación jurídica, recuerda que no estás autorizado para ofrecer asesoramiento legal.\r\n"
-                		+ "\r\n"
-                		+ "Contesta siempre en español, de forma clara, educada y profesional.")
-                .build();
+        String systemPrompt=null;
+   	 
+	   	 try {
+	   		systemPrompt = Files.readString(Paths.get(Constants.PATH_SYSTEM_PROMPT));
+	   	 } catch (IOException e) {
+	   		log.error("Se ha producido un error al recuperar el prompt del sistema");
+	   		e.printStackTrace();
+	   	 }
+	
+	      return builder
+	              .defaultSystem(systemPrompt)
+	              .build();
     }
    
-//    String systemPrompt="";
-//	 
-//	 try {
-//		systemPrompt = Files.readString(Paths.get("src/main/resources/system-prompt.txt"));
-//	 } catch (IOException e) {
-//		log.error("Se ha producido un error al recuperar el prompt del sistema");
-//		e.printStackTrace();
-//	 }
-//
-//   return builder
-//           .defaultSystem(systemPrompt)
-//           .build();
+
 }

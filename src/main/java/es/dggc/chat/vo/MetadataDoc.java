@@ -4,11 +4,15 @@ import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import es.dggc.chat.util.Constants;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Objeto para metadatos de documentos para RAG
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -21,11 +25,14 @@ public class MetadataDoc {
 	private String confidenciality;
 	private String author;
 	private String source;
+	private String reference;
 	
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, 
+			pattern = Constants.FORMAT_LOCAL_DATE)
 	private LocalDate publicationDate;
 	
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, 
+			pattern = Constants.FORMAT_LOCAL_DATE)
 	private LocalDate lastUpdated;
-	private String reference;
+	
 }
