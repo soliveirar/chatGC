@@ -39,7 +39,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .collect(Collectors.joining("; "));
 
         ChatResponse response = new ChatResponse();
-        response.setState(State.CAMPOS_OBLIGATORIOS);
+        response.setState(State.MISSING_FIELDS);
         response.setTime(LocalDateTime.now());
         response.setResponse(errorMessage);
 

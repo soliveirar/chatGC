@@ -19,19 +19,19 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatResponse {
+public class RagResponse {
 	
-	//Identificador del usuario para mantener el contexto conversacional de la peticiones
-	private String userId;
+	//Nombre del documento subido
+	private String filename;
 	
-	//Respuesta generada por el modelo
-	private String response;
-	
-	//Listado de documentos relevantes usados en el contexto para generar una respuesta
-	private List<String> documents;
+	//Tamanyio del documento subido
+	private long size;
 	
 	//Estado de la respuesta
 	private State state;
+	
+	//Campo para incluir informacion adicional al estado
+	private String message;
 	
 	//Fecha de envio de la respuesta
 	@JsonFormat(shape = JsonFormat.Shape.STRING, 

@@ -34,11 +34,11 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Controlador que procesa una solicitud de chat recibida desde el cliente.
  *
- * -Valida la entrada del usuario. -Busca documentos relevantes relacionados con
- * el mensaje enviado. -Registra el mensaje del usuario para mantener el
- * historial de conversación. -Realiza la consulta al modelo, incluyendo
- * contexto relevante obtenido de los documentos. -Genera y devuelve una
- * respuesta al usuario en un objeto, que incluye el estado y mensaje de
+ * -Valida la entrada del usuario. 
+ * -Busca documentos relevantes relacionados con el mensaje enviado. 
+ * -Registra el mensaje del usuario para mantener el historial de conversación. 
+ * -Realiza la consulta al modelo, incluyendo contexto relevante obtenido de los documentos. 
+ * -Genera y devuelve una respuesta al usuario en un objeto, que incluye el estado y mensaje de
  * resultado.
  * 
  */
@@ -62,7 +62,7 @@ public class ChatController {
 	 * Metodo que recibe la consulta del usuario, recupera los documentos relevantes
 	 * del RAG para el contexto y genera una respuesta
 	 * 
-	 * @param request
+	 * @param request Peticion recibida por parte del usuario que contiene id y consulta
 	 * @return
 	 */
 	@PostMapping("/api/chat")
@@ -117,13 +117,25 @@ public class ChatController {
 			return ResponseEntity.ok(chatResponse);
 
 		} catch (Exception e) {
-			e.printStackTrace();
-			log.error(e.getMessage());
-			ChatResponse chatResponse = new ChatResponse();
-			chatResponse.setResponse(e.getMessage());
-			chatResponse.setState(State.GENERIC_ERROR);
-			return ResponseEntity.internalServerError().body(chatResponse);
+			return buildErrorResponse(e, State.GENERIC_ERROR);
 		}
+	}
+
+	/**
+	 * Construye una respuesta de error a partir de una excepción y un estado de error específico.
+	 * @param exception.Excepción que provocó el error 
+	 * @param state Estado que representa el tipo de error 
+	 * @return
+	 */
+	private ResponseEntity<ChatResponse> buildErrorResponse(Exception exception, State state) {
+		log.error("Error: {}", exception.getMessage(), exception);
+		
+		ChatResponse response = new ChatResponse();
+		response.setResponse(exception.getMessage());
+		response.setState(state);
+		response.setTime(LocalDateTime.now());
+		
+		return ResponseEntity.internalServerError().body(response);
 	}
 
 }

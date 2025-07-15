@@ -7,7 +7,7 @@ public final class Constants {
 	
 	public static final String FORMAT_LOCAL_DATETIME = "dd/MM/yyyy HH:mm:ss";
 	public static final String FORMAT_LOCAL_DATE = "dd/MM/yyyy";
+	public static final Object CONTENT_TYPE_PDF = "application/pdf";
 	public static final String RAG_KEY = "qa_retrieved_documents";
-	
-	
+
 }

@@ -18,46 +18,53 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import es.dggc.chat.vo.MetadataDoc;
 
+/**
+ * Servicio responsable de procesar documentos cargados por el usuario. -
+ * Lectura del contenido del archivo usando Apache Tika. - Division del texto en
+ * fragmentos manejables utilizando un TokenTextSplitter. - Asignacion de
+ * metadatos proporcionados por el usuario a cada fragmento del documento.
+ */
 @Service
 public class DocumentService {
 
-	
-		/**
-		 * 
-		 * @param file
-		 * @return
-		 * @throws IOException
-		 */
-	    public List<Document> extractTextFromDocument(MultipartFile file, MetadataDoc metadataDoc) throws IOException {
-	    	
-	    	Resource resource = new InputStreamResource(file.getInputStream());
-	    	TikaDocumentReader tikaDocumentReader = new TikaDocumentReader (resource);
-	    	
-	    	/*
-	    	 * defaultChunkSize:El tamaño objetivo de cada fragmento de texto en tokens (predeterminado: 800).
-			 minChunkSizeChars:El tamaño mínimo de cada fragmento de texto en caracteres (predeterminado: 350).
-			 minChunkLengthToEmbed:La longitud mínima de un fragmento que se incluirá (valor predeterminado: 5).
-             maxNumChunks:El número máximo de fragmentos a generar a partir de un texto (valor predeterminado: 10000).
-             keepSeparator:Si se deben mantener los separadores (como nuevas líneas) en los fragmentos (valor predeterminado: verdadero).
-	    	 */
-	    	List<Document> documents = new TokenTextSplitter(1024,  // chunkSize
-	    			200,  // chunkOverlap
-	    			200,  // maxChunks
-	    			5000, // maxTokenCount
-	    			true) // preserveWhitespace
-	    			.apply(tikaDocumentReader.read());
-	    	
-	
-	    	//Metadata
-	    	//Conversion del objeto de metadatos a key-value para su insercion en bbdd
-	    	ObjectMapper mapper = new ObjectMapper();
-	    	mapper.registerModule(new JavaTimeModule());
-	    	Map<String, String> metadata = mapper.convertValue(metadataDoc, new TypeReference<Map<String, String>>() {});
-	    	
-	    	//Asignacion de metadatos a los documentos
-	    	documents.stream().forEach(d -> d.getMetadata().putAll(metadata));
-	    	
-	    	return documents;
-	    
-	    }
+	/**
+	 * Extrae el texto de un documento cargado por el usuario, lo divide en
+	 * fragmentos y asocia los metadatos proporcionados a cada fragmento.
+	 *
+	 * @param file.        Documento cargado
+	 * @param metadataDoc. Objeto que contiene los metadatos asociados al documento.
+	 * @return Una lista de objetos, cada uno con una porción de texto y sus
+	 *         metadatos.
+	 * @throws IOException Si ocurre un error al leer el contenido del archivo.
+	 */
+	public List<Document> extractTextFromDocument(MultipartFile file, MetadataDoc metadataDoc) throws IOException {
+
+		// Crea un recurso a partir del archivo cargado
+		Resource resource = new InputStreamResource(file.getInputStream());
+
+		// Lee el contenido del documento usando Apache Tika
+		TikaDocumentReader tikaDocumentReader = new TikaDocumentReader(resource);
+
+		// Divide el texto en fragmentos (chunks) utilizando reglas de tokenización
+		List<Document> documents = new TokenTextSplitter(1024, // chunkSize
+				200, // chunkOverlap
+				200, // maxChunks
+				5000, // maxTokenCount
+				true // preserveWhitespace
+		).apply(tikaDocumentReader.read());
+		;
+
+		// Convierte los metadatos a un Map<String, String> para asignarlos a los
+		// documentos
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new JavaTimeModule());
+		Map<String, String> metadata = mapper.convertValue(metadataDoc, new TypeReference<Map<String, String>>() {
+		});
+
+		// Asigna los metadatos a cada fragmento del documento
+		documents.stream().forEach(d -> d.getMetadata().putAll(metadata));
+
+		return documents;
+
+	}
 }

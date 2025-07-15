@@ -14,8 +14,11 @@ import lombok.Getter;
 public enum State {
 
 	OK("0000", "La consulta se ha realizado correctamente."),
-    CAMPOS_OBLIGATORIOS("E001", "Faltan campos obligatorios en la petición"),
-	GENERIC_ERROR("E999", "Se ha producido un error durante la consulta." );
+	MISSING_FIELDS("E001", "Faltan campos obligatorios en la petición."),
+	DOCUMENT_REQUIRED("E002", "No se ha adjuntado ningún documento."), 
+	INVALID_DOCUMENT("E003", "Sólo se admiten documentos en formato PDF."),
+	DOCUMENT_READ_ERROR("E004", "No ha sido posible extraer el texto del documento."),
+	GENERIC_ERROR("E999", "Se ha producido un error durante la consulta." ); 
 	
 	private final String code;
 	private final String message;

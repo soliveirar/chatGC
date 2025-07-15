@@ -21,12 +21,15 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ChatRequest {
 
+	//Identificador del usuario para mantener el contexto conversacional de la peticiones
 	@NotBlank(message = "El identificador de usuario es obligatorio")
 	private String userId;
 	
+	//Consulta/pregunta realizada por el usuario
 	@NotBlank(message = "El mensaje es obligatorio")
 	private String message;
 	
+	//Fecha de envio de la peticion
 	@JsonFormat(shape = JsonFormat.Shape.STRING, 
 			pattern = Constants.FORMAT_LOCAL_DATETIME)
 	private LocalDateTime time;
