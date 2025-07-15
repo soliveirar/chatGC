@@ -3,7 +3,6 @@ package es.dggc.chat.controller;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,11 +34,12 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Controlador que procesa una solicitud de chat recibida desde el cliente.
  *
- *-Valida la entrada del usuario.
- *-Busca documentos relevantes relacionados con el mensaje enviado.
- *-Registra el mensaje del usuario para mantener el historial de conversación.
- *-Realiza la consulta al modelo, incluyendo contexto relevante obtenido de los documentos.
- *-Genera y devuelve una respuesta al usuario en un objeto, que incluye el estado y mensaje de resultado.
+ * -Valida la entrada del usuario. -Busca documentos relevantes relacionados con
+ * el mensaje enviado. -Registra el mensaje del usuario para mantener el
+ * historial de conversación. -Realiza la consulta al modelo, incluyendo
+ * contexto relevante obtenido de los documentos. -Genera y devuelve una
+ * respuesta al usuario en un objeto, que incluye el estado y mensaje de
+ * resultado.
  * 
  */
 @Slf4j
@@ -66,41 +66,32 @@ public class ChatController {
 	 * @return
 	 */
 	@PostMapping("/api/chat")
-	public ResponseEntity<ChatResponse> generate(@Valid @RequestBody ChatRequest request) {
+	public ResponseEntity<ChatResponse> handleChatRequest(@Valid @RequestBody ChatRequest request) {
 		try {
 
-			log.info("Pregunta recibida por el usuario {}: {}", 
-					request.getUserId(), request.getMessage());
+			log.info("Pregunta recibida por el usuario {}: {}", request.getUserId(), request.getMessage());
 
 			// Se incluye mensaje recibido en chatmemory para contexto
 			chatMemory.add(request.getUserId(), new UserMessage(request.getMessage()));
 
 			// Establece las caracteristicas para la recuperacion de documentos relevantes
-			SearchRequest searchRequest = SearchRequest.builder()
-					.query(request.getMessage())
-					.topK(5)
-					.similarityThreshold(0.6)
-					.build();
+			SearchRequest searchRequest = SearchRequest.builder().query(request.getMessage()).topK(5)
+					.similarityThreshold(0.6).build();
 
 			// Se define el prompt para el RAG
 			PromptTemplate promptTemplate = new PromptTemplate(Files.readString(Paths.get(Constants.PATH_RAG_PROMPT)));
 
-			// Se define el advisor del RAG incluyendo los parametros de busqueda y el prompt
-			QuestionAnswerAdvisor advisor = QuestionAnswerAdvisor.builder(vectorStore)
-					.searchRequest(searchRequest)
-					.promptTemplate(promptTemplate)
-					.build();
+			// Se define el advisor del RAG incluyendo los parametros de busqueda y el
+			// prompt personalizado
+			QuestionAnswerAdvisor advisor = QuestionAnswerAdvisor.builder(vectorStore).searchRequest(searchRequest)
+					.promptTemplate(promptTemplate).build();
 
 			/*
 			 * Devuelve la respuesta generada por el modelo y el contexto. Es decir, la
 			 * documentación que se ha considerado relevante para generar la respuesta
 			 */
 			ChatClientResponse chatClientResponse = this.chatClient.prompt()
-					.advisors(
-							MessageChatMemoryAdvisor.builder(chatMemory).build(), 
-							advisor
-							)
-					.user(request.getMessage())
+					.advisors(MessageChatMemoryAdvisor.builder(chatMemory).build(), advisor).user(request.getMessage())
 					.call().chatClientResponse();
 
 			log.info("Se obtiene respuesta del modelo......");
@@ -108,25 +99,23 @@ public class ChatController {
 
 			// Se registra la respuesta asociada al mismo usario que la consulta
 			chatMemory.add(request.getUserId(), response);
-			
+
 			// Se genera la respuesta al usuario con los datos obtenidos del modelo
 			ChatResponse chatResponse = new ChatResponse();
 			chatResponse.setResponse(response.getText());
 			chatResponse.setTime(LocalDateTime.now());
 			chatResponse.setUserId(request.getUserId());
-			
+
 			// Recuperacion de documentos relevantes
 			List<String> rag = chatClientResponse.context().entrySet().stream()
-				    .filter(entry -> Constants.RAG_KEY.equals(entry.getKey()))
-				    .flatMap(entry -> ((List<Document>) entry.getValue()).stream())
-				    .map(doc -> doc.getMetadata().toString())
-				    .collect(Collectors.toList());
+					.filter(entry -> Constants.RAG_KEY.equals(entry.getKey()))
+					.flatMap(entry -> ((List<Document>) entry.getValue()).stream())
+					.map(doc -> doc.getMetadata().toString()).collect(Collectors.toList());
 			chatResponse.setDocuments(rag);
 			chatResponse.setState(State.OK);
 
 			return ResponseEntity.ok(chatResponse);
-			
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error(e.getMessage());
