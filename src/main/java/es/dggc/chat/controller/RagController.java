@@ -59,7 +59,7 @@ public class RagController {
 
 			log.info("Nuevo documento recibido..............");
 			log.info("Nombre: {}", file.getOriginalFilename());
-			log.info("Metadata: {}", metadata.getMetadataAsString());
+			log.info("Metadata: {}", metadata.metadataAsString());
 
 			// Validacion del documento
 			State state = Utils.validateDocument(file);

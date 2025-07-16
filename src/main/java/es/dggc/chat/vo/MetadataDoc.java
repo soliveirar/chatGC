@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import es.dggc.chat.util.Constants;
 import jakarta.validation.constraints.NotBlank;
@@ -62,8 +63,9 @@ public class MetadataDoc {
 	private LocalDate lastUpdated;
 	
 	//Se genera un string con todos los metadatos para la visualizacion
-	public String getMetadataAsString() {
+	public String metadataAsString() {
 		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new JavaTimeModule());
 		String metadataAsString = null;
 		try {
 			metadataAsString = mapper.writeValueAsString(this);
