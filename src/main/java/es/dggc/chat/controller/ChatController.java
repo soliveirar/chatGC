@@ -46,17 +46,14 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 public class ChatController {
 
-	private final ChatClient chatClient;
+	@Autowired
+	ChatClient chatClient;
 
 	@Autowired
 	VectorStore vectorStore;
 
 	@Autowired
 	ChatMemory chatMemory;
-
-	public ChatController(ChatClient chatClient) {
-		this.chatClient = chatClient;
-	}
 
 	/**
 	 * Metodo que recibe la consulta del usuario, recupera los documentos relevantes
@@ -71,8 +68,9 @@ public class ChatController {
 
 			log.info("Pregunta recibida por el usuario {}: {}", request.getUserId(), request.getMessage());
 
-			// Se incluye mensaje recibido en chatmemory para contexto
-			chatMemory.add(request.getUserId(), new UserMessage(request.getMessage()));
+			// Se establece que messageChatMemory registre el identificador de usuario
+			MessageChatMemoryAdvisor messageChatMemoryAdvisor = MessageChatMemoryAdvisor.builder(chatMemory).
+			conversationId(request.getUserId()).build();
 
 			// Establece las caracteristicas para la recuperacion de documentos relevantes
 			SearchRequest searchRequest = SearchRequest.builder().query(request.getMessage()).topK(5)
@@ -83,7 +81,7 @@ public class ChatController {
 
 			// Se define el advisor del RAG incluyendo los parametros de busqueda y el
 			// prompt personalizado
-			QuestionAnswerAdvisor advisor = QuestionAnswerAdvisor.builder(vectorStore).searchRequest(searchRequest)
+			QuestionAnswerAdvisor questionAnswerAdvisor = QuestionAnswerAdvisor.builder(vectorStore).searchRequest(searchRequest)
 					.promptTemplate(promptTemplate).build();
 
 			/*
@@ -91,14 +89,13 @@ public class ChatController {
 			 * documentación que se ha considerado relevante para generar la respuesta
 			 */
 			ChatClientResponse chatClientResponse = this.chatClient.prompt()
-					.advisors(MessageChatMemoryAdvisor.builder(chatMemory).build(), advisor).user(request.getMessage())
+					.advisors(messageChatMemoryAdvisor, 
+							  questionAnswerAdvisor)
+					.user(request.getMessage())
 					.call().chatClientResponse();
 
 			log.info("Se obtiene respuesta del modelo......");
 			AssistantMessage response = chatClientResponse.chatResponse().getResult().getOutput();
-
-			// Se registra la respuesta asociada al mismo usario que la consulta
-			chatMemory.add(request.getUserId(), response);
 
 			// Se genera la respuesta al usuario con los datos obtenidos del modelo
 			ChatResponse chatResponse = new ChatResponse();
