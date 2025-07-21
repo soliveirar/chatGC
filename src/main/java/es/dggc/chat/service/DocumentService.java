@@ -1,4 +1,4 @@
-package es.dggc.chat.controller;
+package es.dggc.chat.service;
 
 import java.io.IOException;
 import java.util.List;
