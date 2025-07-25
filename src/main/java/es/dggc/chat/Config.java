@@ -46,12 +46,12 @@ class Config {
 
         	ChatMemory chatMemory = MessageWindowChatMemory.builder()
         	    .chatMemoryRepository(chatMemoryRepository)
-        	    .maxMessages(10)
+        	    .maxMessages(20)
         	    .build();
         	
         	return chatMemory;
     	
-    	//return JdbcChatMemoryRepository.create(JdbcChatMemoryRepositoryAutoConfiguration.builder().jdbcTemplate(jdbcTemplate).build());
+    	
     }
    
     	
