@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import es.dggc.chat.service.DocumentService;
+import es.dggc.chat.util.Constants;
 import es.dggc.chat.util.State;
 import es.dggc.chat.util.Utils;
 import es.dggc.chat.vo.MetadataDoc;
@@ -85,6 +86,7 @@ public class RagController {
 				response.setSize(file.getSize());
 				response.setState(state);
 				response.setTime(LocalDateTime.now());
+				response.setMessage(Constants.MSG_RAG_OK);			
 				return ResponseEntity.ok().body(response);
 
 			} else {
@@ -120,15 +122,4 @@ public class RagController {
 	    return ResponseEntity.internalServerError().body(response);
 	}
 
-
-//	@GetMapping("/api/test/") 
-//	public ResponseEntity<String> testRAG(@RequestParam(value = "message") String message) {
-//		log.info("Petición recibida");
-//
-//			// Retrieve documents similar to a query
-//			List<Document> results = this.vectorStore.similaritySearch(SearchRequest.builder().query(message).topK(5).build());
-//			
-//			results.stream().forEach(r -> log.info(r.getText()));
-//			return ResponseEntity.ok("ok");
-//	}
 }
